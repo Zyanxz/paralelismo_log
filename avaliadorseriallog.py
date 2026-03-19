@@ -5,19 +5,34 @@ import string
 
 
 # ===============================
-# Geração de arquivos de teste
+# Consolidação dos resultados
 # ===============================
 
-def gerar_arquivos(pasta, qtd_arquivos=50, linhas_por_arquivo=200):
-    os.makedirs(pasta, exist_ok=True)
+def consolidar_resultados(resultados):
+    total_linhas = 0
+    total_palavras = 0
+    total_caracteres = 0
 
-    palavras = ["erro", "warning", "info", "processo", "dados", "sistema"]
+    contagem_global = {
+        "erro": 0,
+        "warning": 0,
+        "info": 0
+    }
 
-    for i in range(qtd_arquivos):
-        with open(os.path.join(pasta, f"arquivo_{i}.txt"), "w", encoding="utf-8") as f:
-            for _ in range(linhas_por_arquivo):
-                linha = " ".join(random.choices(palavras, k=20))
-                f.write(linha + "\n")
+    for r in resultados:
+        total_linhas += r["linhas"]
+        total_palavras += r["palavras"]
+        total_caracteres += r["caracteres"]
+
+        for chave in contagem_global:
+            contagem_global[chave] += r["contagem"][chave]
+
+    return {
+        "linhas": total_linhas,
+        "palavras": total_palavras,
+        "caracteres": total_caracteres,
+        "contagem": contagem_global
+    }
 
 
 # ===============================
@@ -60,6 +75,7 @@ def processar_arquivo(caminho):
     }
 
 
+
 # ===============================
 # Execução serial
 # ===============================
@@ -77,11 +93,22 @@ def executar_serial(pasta):
 
     fim = time.time()
 
-    print("=== EXECUÇÃO SERIAL ===")
+    resumo = consolidar_resultados(resultados)
+
+    print("\n=== EXECUÇÃO SERIAL ===")
     print(f"Arquivos processados: {len(resultados)}")
     print(f"Tempo total: {fim - inicio:.4f} segundos")
 
-    return resultados
+    print("\n=== RESULTADO CONSOLIDADO ===")
+    print(f"Total de linhas: {resumo['linhas']}")
+    print(f"Total de palavras: {resumo['palavras']}")
+    print(f"Total de caracteres: {resumo['caracteres']}")
+
+    print("\nContagem de palavras-chave:")
+    for k, v in resumo["contagem"].items():
+        print(f"  {k}: {v}")
+
+    return resumo
 
 
 # ===============================
@@ -89,10 +116,7 @@ def executar_serial(pasta):
 # ===============================
 
 if __name__ == "__main__":
-    pasta = "dados"
-
-    print("Gerando arquivos de teste...")
-    gerar_arquivos(pasta, qtd_arquivos=100, linhas_por_arquivo=300)
+    pasta = "log2"
 
     print("Executando versão serial...")
     executar_serial(pasta)
