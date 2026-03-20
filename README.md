@@ -1,52 +1,129 @@
-# unieuro-concorrente-202601-atividade3
-Paralelizar avaliador de arquivos de log.
+---
 
-## Passo-a-passo
+## 1. Descrição do Problema
 
-1) Implemente a solução paralela que possa ser executada com 2, 4, 8, 12 processos
-2) Execute o experimento para medir os tempos em paralelo
-3) Construa um relatório de análise dos resultados (MODELO DO RELATÓRIO RELATORIO_MODELO.MD - SALVAR COMO README.MD)
-4) Crie um repositório público no GitHub incluindo os programas python e o README.MD no formato de relatório.
-5) Responda o questionário no AVA
+Este programa implementa a análise paralela de logs para contar palavras-chave específicas (`erro`, `warning`, `info`). O objetivo é comparar o desempenho da versão serial com versões paralelas utilizando múltiplas threads/processos. 
 
-## Problema
+O algoritmo processa arquivos de texto que simulam um grande volume de dados de logs, contando linhas, palavras, caracteres e ocorrências das palavras-chave. A complexidade é aproximadamente O(n) para cada arquivo, onde n é o número de linhas.
 
-Uma empresa precisa processar grandes volumes de arquivos texto contendo logs operacionais. Cada arquivo deve ser analisado para extrair informações relevantes que serão utilizadas em relatórios gerenciais.
+A paralelização visa reduzir o tempo total de processamento dividindo a carga entre múltiplas threads/processos para acelerar a execução.
 
-Atualmente, o sistema realiza esse processamento de forma sequencial (serial), o que gera um tempo elevado de execução quando há muitos arquivos.
+---
 
-Para melhorar o desempenho, deseja-se evoluir o sistema para uma versão paralela, utilizando o modelo produtor-consumidor com buffer limitado.
+## 2. Ambiente Experimental
 
+| Item                | Descrição                                      |
+|---------------------|------------------------------------------------|
+| Processador         | Intel Core i7-7700HQ (4 núcleos físicos, 8 threads) |
+| Número de núcleos   | 4 núcleos físicos (8 threads lógicos)          |
+| Memória RAM         | 16 GB DDR4                                      |
+| Sistema Operacional | Windows 10 Pro 64-bit                           |
+| Linguagem           | Python 3.10                                     |
+| Biblioteca          | multiprocessing, threading                       |
+| Compilador / Versão | Python 3.10.6                                   |
 
-## Exemplo1
-No processamento da pasta log1 o resultado esperado é:
+---
 
-=== RESULTADO CONSOLIDADO ===  
-Total de linhas: 600  
-Total de palavras: 12000  
-Total de caracteres: 82085  
-  
-Contagem de palavras-chave:  
-  erro: 1993  
-  warning: 1998  
-  info: 1983  
+## 3. Metodologia de Testes
 
+- O tempo de execução foi medido utilizando a função `time.time()` antes e depois da execução.
+- Para cada configuração (1, 2, 4, 8, 12 threads/processos), o programa foi executado uma vez, medindo o tempo total.
+- O tamanho da entrada consiste em um conjunto de arquivos de log na pasta `log2`.
+- Os testes foram realizados em máquina dedicada, com pouca carga externa para garantir maior precisão.
 
-## Dicas
+Configurações testadas:
 
-1) Implemente a solução utilizando os arquivos da pasta log1.
-2) Realize o experimento e construa o relatório utilizando os arquivos da pasta log2.
+- 1 thread/processo (versão serial)
+- 2 threads/processos
+- 4 threads/processos
+- 8 threads/processos
+- 12 threads/processos
 
-=== EXECUÇÃO SERIAL ===
-Arquivos processados: 1000  
-Tempo total: 115.9621 segundos  
-  
-=== RESULTADO CONSOLIDADO ===  
-Total de linhas: 10000000  
-Total de palavras: 200000000  
-Total de caracteres: 1366663305  
-  
-Contagem de palavras-chave:  
-  erro: 33332083  
-  warning: 33330520  
-  info: 33329065  
+---
+
+## 4. Resultados Experimentais
+
+| Nº Threads/Processos | Tempo Médio de Execução (s) |
+|---------------------|-----------------------------|
+| 1                   | 103.76                      |
+| 2                   | 54.99                       |
+| 4                   | 31.37                       |
+| 8                   | 21.77                       |
+| 12                  | 21.05                       |
+
+---
+
+## 5. Cálculo de Speedup e Eficiência
+
+### Fórmulas Utilizadas
+
+- Speedup(p) = T(1) / T(p)  
+- Eficiência(p) = Speedup(p) / p
+
+### Valores calculados
+
+| Threads/Processos | Tempo (s) | Speedup | Eficiência |
+|-------------------|-----------|---------|------------|
+| 1                 | 103.76    | 1.00    | 100%       |
+| 2                 | 54.99     | 1.89    | 94%        |
+| 4                 | 31.37     | 3.31    | 83%        |
+| 8                 | 21.77     | 4.77    | 59%        |
+| 12                | 21.05     | 4.93    | 41%        |
+
+---
+
+## 6. Tabela de Resultados
+
+| Threads/Processos | Tempo (s) | Speedup | Eficiência |
+|-------------------|-----------|---------|------------|
+| 1                 | 103.76    | 1.00    | 100%       |
+| 2                 | 54.99     | 1.89    | 94%        |
+| 4                 | 31.37     | 3.31    | 83%        |
+| 8                 | 21.77     | 4.77    | 59%        |
+| 12                | 21.05     | 4.93    | 41%        |
+
+---
+
+## 7. Gráfico de Tempo de Execução
+
+![Gráfico de Tempo de Execução](tempo_execucao.png)
+
+---
+
+## 8. Gráfico de Speedup
+
+![Gráfico de Speedup](speedup.png)
+
+---
+
+## 9. Gráfico de Eficiência
+
+![Gráfico de Eficiência](eficiencia.png)
+
+---
+
+## 10. Análise dos Resultados
+
+O speedup obtido se aproxima do ideal até 4 threads/processos, com ganhos expressivos de desempenho. Após esse ponto, o ganho diminui significativamente, especialmente entre 8 e 12 threads/processos.
+
+A eficiência acompanha esse comportamento, começando alta (próxima a 100%) e decaindo conforme o número de threads/processos aumenta. A queda na eficiência a partir de 8 threads indica que o overhead de paralelização, sincronização e limitações de hardware começam a impactar o desempenho.
+
+Além disso, o número de núcleos físicos da máquina (4) limita o escalonamento eficiente. A execução com mais threads do que núcleos físicos resulta em overhead de troca de contexto, reduzindo os ganhos.
+
+Outros possíveis gargalos incluem operações de I/O, contenção de memória e sincronização entre processos, que limitam a escalabilidade.
+
+---
+
+## 11. Conclusão
+
+O paralelismo trouxe ganhos significativos, reduzindo o tempo de execução para aproximadamente 20% do original com 8 threads. O melhor custo-benefício foi observado com 4 threads, onde o speedup foi alto e a eficiência ainda razoável.
+
+O programa escala bem até certo ponto, mas sofre limitações naturais de hardware e overhead de paralelização. Para ganhos além de 8 threads, seria necessária otimização do algoritmo ou hardware com mais núcleos físicos.
+
+---
+
+## Arquivos de imagem
+
+- tempo_execucao.png  
+- speedup.png  
+- eficiencia.png  
